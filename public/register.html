@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Register — PickleCourt</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-pc">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center gap-2 fw-bold" href="index.html">
+      <span class="brand-badge"><i class="bi bi-circle-fill" style="font-size:.7rem"></i></span>
+      Pickle<span class="text-success">Court</span></a>
+    <div class="d-flex gap-2 align-items-center">
+      <button class="btn btn-sm btn-outline-secondary rounded-circle p-2" onclick="toggleTheme()"><i class="theme-icon bi bi-moon-stars"></i></button>
+      <a href="login.html" class="btn btn-pc btn-sm">Login</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container py-5" style="max-width:880px">
+  <div class="text-center mb-4 fade-up">
+    <h2 class="section-title">Create Your Account</h2>
+    <p class="text-secondary">Register to start booking courts. All fields marked * are required.</p>
+  </div>
+
+  <form id="regForm" class="card-pc p-4 p-md-5 fade-up" novalidate>
+    <h5 class="fw-bold text-success mb-3"><i class="bi bi-person me-2"></i>Personal Information</h5>
+    <div class="row g-3 mb-4">
+      <div class="col-md-4"><label class="form-label">First Name *</label><input class="form-control" name="firstName" required></div>
+      <div class="col-md-4"><label class="form-label">Middle Name</label><input class="form-control" name="middleName"></div>
+      <div class="col-md-4"><label class="form-label">Last Name *</label><input class="form-control" name="lastName" required></div>
+      <div class="col-md-4"><label class="form-label">Birthday *</label><input type="date" class="form-control" name="birthday" required></div>
+      <div class="col-md-4"><label class="form-label">Gender *</label>
+        <select class="form-select" name="gender" required><option value="">Select…</option>
+        <option>Male</option><option>Female</option><option>Other</option><option>Prefer not to say</option></select></div>
+      <div class="col-md-4"><label class="form-label">Nationality *</label><input class="form-control" name="nationality" value="Filipino" required></div>
+    </div>
+
+    <h5 class="fw-bold text-primary mb-3"><i class="bi bi-telephone me-2"></i>Contact Information</h5>
+    <div class="row g-3 mb-4">
+      <div class="col-md-4"><label class="form-label">Mobile Number *</label>
+        <input class="form-control" name="mobile" placeholder="09XXXXXXXXX" required>
+        <div class="form-text">Philippine format: 09XXXXXXXXX</div></div>
+      <div class="col-md-4"><label class="form-label">Email Address *</label><input type="email" class="form-control" name="email" required></div>
+      <div class="col-md-4"><label class="form-label">Home Address *</label><input class="form-control" name="address" required></div>
+    </div>
+
+    <h5 class="fw-bold text-success mb-3"><i class="bi bi-heart-pulse me-2"></i>Emergency Contact</h5>
+    <div class="row g-3 mb-4">
+      <div class="col-md-4"><label class="form-label">Name *</label><input class="form-control" name="emergencyName" required></div>
+      <div class="col-md-4"><label class="form-label">Relationship *</label><input class="form-control" name="emergencyRelationship" required></div>
+      <div class="col-md-4"><label class="form-label">Contact Number *</label><input class="form-control" name="emergencyContact" required></div>
+    </div>
+
+    <h5 class="fw-bold text-primary mb-3"><i class="bi bi-key me-2"></i>Account Information</h5>
+    <div class="row g-3 mb-4">
+      <div class="col-md-4"><label class="form-label">Username *</label><input class="form-control" name="username" required></div>
+      <div class="col-md-4"><label class="form-label">Password *</label>
+        <input type="password" class="form-control" name="password" minlength="8" required>
+        <div class="form-text">Minimum 8 characters</div></div>
+      <div class="col-md-4"><label class="form-label">Confirm Password *</label><input type="password" class="form-control" name="confirmPassword" required></div>
+    </div>
+
+    <div class="alert alert-danger d-none" id="regError"></div>
+    <button class="btn btn-pc w-100 py-2" type="submit" id="regBtn">
+      <i class="bi bi-person-plus me-2"></i>Create Account</button>
+    <p class="text-center mt-3 mb-0 small text-secondary">Already have an account? <a href="login.html" class="text-success fw-semibold">Log in</a></p>
+  </form>
+
+  <div class="card-pc p-5 text-center d-none fade-up" id="regSuccess">
+    <span class="icon-circle ic-green mx-auto mb-3" style="width:80px;height:80px;font-size:2rem"><i class="bi bi-envelope-check"></i></span>
+    <h3 class="fw-bold">Check Your Email!</h3>
+    <p class="text-secondary">We sent a verification link to <strong id="regEmail"></strong>.<br>Verify your email, then log in to start booking.</p>
+    <div class="alert alert-info small" id="devLinkBox">
+      <i class="bi bi-info-circle me-1"></i><strong>Demo mode</strong> (no SMTP configured):
+      <a href="#" id="devLink" class="fw-bold">Click here to verify your email now</a>
+    </div>
+    <a href="login.html" class="btn btn-pc mx-auto">Go to Login</a>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/common.js"></script>
+<script>
+document.getElementById('regForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const f = e.target, err = document.getElementById('regError'), btn = document.getElementById('regBtn');
+  err.classList.add('d-none');
+  const body = Object.fromEntries(new FormData(f).entries());
+  if (body.password !== body.confirmPassword) {
+    err.textContent = 'Passwords do not match.'; err.classList.remove('d-none'); return;
+  }
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Creating account…';
+  try {
+    const res = await API.post('/api/auth/register', body);
+    f.classList.add('d-none');
+    document.getElementById('regEmail').textContent = body.email;
+    document.getElementById('devLink').href = res.devVerifyLink;
+    document.getElementById('regSuccess').classList.remove('d-none');
+    toast('Registration successful! Verification email sent.');
+  } catch (ex) {
+    err.textContent = ex.message; err.classList.remove('d-none');
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-person-plus me-2"></i>Create Account';
+    window.scrollTo({ top: err.offsetTop - 120, behavior: 'smooth' });
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin — Snow Bear CourtOS</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+<div class="loading-overlay" id="pcLoader"><div class="bounce-ball"></div><div class="fw-bold text-success">Loading admin portal…</div></div>
+
+<div class="d-flex">
+  <aside class="sidebar p-3 d-none d-lg-block" style="width:250px;flex-shrink:0">
+    <a href="index.html" class="d-flex align-items-center gap-2 fw-bold fs-6 text-decoration-none mb-1" style="color:var(--pc-ink)">
+      <span class="brand-logo-slot" data-size="40"></span>
+      Snow Bear <span class="text-success">CourtOS</span></a>
+    <div class="small text-secondary mb-3 ms-1"><span id="venueLabel"></span> · <span id="roleLabel"></span></div>
+    <nav class="nav flex-column" id="sideNav">
+      <a class="nav-link active" href="#stats" data-view="stats"><i class="bi bi-speedometer2"></i> Dashboard</a>
+      <a class="nav-link" href="#bookings" data-view="bookings"><i class="bi bi-journal-check"></i> Bookings</a>
+      <a class="nav-link" href="#calendar" data-view="calendar"><i class="bi bi-calendar3"></i> Calendar</a>
+      <a class="nav-link" href="#payments" data-view="payments"><i class="bi bi-credit-card"></i> Payments</a>
+      <a class="nav-link" href="#courts" data-view="courts"><i class="bi bi-grid"></i> Courts</a>
+      <a class="nav-link" href="#customers" data-view="customers"><i class="bi bi-people"></i> Customers</a>
+      <a class="nav-link" href="#content" data-view="content"><i class="bi bi-images"></i> Highlights <span class="badge bg-warning text-dark rounded-pill ms-auto premium-lock d-none">★</span></a>
+      <a class="nav-link" href="#openplay" data-view="openplay"><i class="bi bi-people"></i> Open Play <span class="badge bg-warning text-dark rounded-pill ms-auto premium-lock d-none">★</span></a>
+      <a class="nav-link" href="#tournaments" data-view="tournaments"><i class="bi bi-trophy"></i> Tournaments <span class="badge bg-warning text-dark rounded-pill ms-auto premium-lock d-none">★</span></a>
+      <a class="nav-link" href="#equipment" data-view="equipment"><i class="bi bi-box-seam"></i> Inventory</a>
+      <a class="nav-link" href="#reports" data-view="reports"><i class="bi bi-file-earmark-bar-graph"></i> Reports <span class="badge bg-warning text-dark rounded-pill ms-auto premium-lock d-none">★</span></a>
+      <a class="nav-link" href="#settings" data-view="settings"><i class="bi bi-gear"></i> Settings</a>
+      <a class="nav-link" href="#audit" data-view="audit"><i class="bi bi-shield-check"></i> Audit Logs</a>
+      <hr>
+      <a class="nav-link text-danger pointer" onclick="API.logout()"><i class="bi bi-box-arrow-left"></i> Log Out</a>
+    </nav>
+  </aside>
+
+  <main class="flex-grow-1" style="min-width:0">
+    <nav class="navbar navbar-pc sticky-top px-3">
+      <button class="btn btn-outline-secondary d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#mobileNav"><i class="bi bi-list"></i></button>
+      <span class="fw-bold" id="pageTitle">Admin Dashboard</span>
+      <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-sm btn-outline-secondary rounded-circle p-2" onclick="toggleTheme()"><i class="theme-icon bi bi-moon-stars"></i></button>
+        <span class="fw-semibold small" id="topUserName"></span>
+        <span class="brand-badge" id="avatarBadge" style="width:34px;height:34px;font-size:.85rem"></span>
+      </div>
+    </nav>
+    <div class="offcanvas offcanvas-start" id="mobileNav" style="max-width:260px">
+      <div class="offcanvas-header"><span class="fw-bold">Menu</span><button class="btn-close" data-bs-dismiss="offcanvas"></button></div>
+      <div class="offcanvas-body" id="mobileNavBody"></div>
+    </div>
+
+    <div class="container-fluid p-3 p-md-4">
+      <div id="subBanner" class="alert d-none align-items-center justify-content-between flex-wrap gap-2 mb-3"></div>
+      <!-- STATS -->
+      <section data-viewpane="stats">
+        <div class="row g-3 mb-4" id="statCards"></div>
+        <div class="row g-3">
+          <div class="col-lg-8"><div class="card-pc p-4"><h6 class="fw-bold mb-3">Revenue (last 14 days)</h6><canvas id="chRevenue" height="110"></canvas></div></div>
+          <div class="col-lg-4"><div class="card-pc p-4"><h6 class="fw-bold mb-3">Court Usage (hours)</h6><canvas id="chUsage" height="220"></canvas></div></div>
+          <div class="col-lg-6"><div class="card-pc p-4"><h6 class="fw-bold mb-3">Booking Trend</h6><canvas id="chTrend" height="120"></canvas></div></div>
+          <div class="col-lg-6"><div class="card-pc p-4"><h6 class="fw-bold mb-3">Peak Hours</h6><canvas id="chPeak" height="120"></canvas></div></div>
+          <div class="col-lg-6"><div class="card-pc p-4"><h6 class="fw-bold mb-3">Customer Growth</h6><canvas id="chGrowth" height="120"></canvas></div></div>
+        </div>
+      </section>
+
+      <!-- BOOKINGS -->
+      <section data-viewpane="bookings" class="d-none">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+          <h4 class="fw-bold mb-0">Booking Management</h4>
+          <div class="d-flex gap-2">
+            <button class="btn btn-outline-secondary btn-sm rounded-3" onclick="exportBookings('csv')"><i class="bi bi-filetype-csv me-1"></i>Export CSV/Excel</button>
+            <button class="btn btn-outline-secondary btn-sm rounded-3" onclick="window.print()"><i class="bi bi-printer me-1"></i>Print / PDF</button>
+          </div>
+        </div>
+        <div class="card-pc p-3 mb-3">
+          <div class="row g-2">
+            <div class="col-md-4"><input class="form-control" id="fQ" placeholder="🔍 Search ref, customer, email…"></div>
+            <div class="col-6 col-md-2"><input type="date" class="form-control" id="fDate"></div>
+            <div class="col-6 col-md-2"><select class="form-select" id="fCourt"><option value="">All courts</option></select></div>
+            <div class="col-6 col-md-2"><select class="form-select" id="fStatus"><option value="">All statuses</option>
+              <option>Pending</option><option>Approved</option><option>Rejected</option><option>Cancelled</option></select></div>
+            <div class="col-6 col-md-2"><button class="btn btn-pc w-100" onclick="loadAdminBookings()">Filter</button></div>
+          </div>
+        </div>
+        <div class="card-pc p-3"><div class="table-responsive">
+          <table class="table table-pc align-middle">
+            <thead><tr><th>Ref</th><th>Customer</th><th>Court</th><th>Date / Time</th><th>Amount</th><th>Status</th><th>Payment</th><th>Actions</th></tr></thead>
+            <tbody id="adminBookingRows"></tbody>
+          </table>
+        </div></div>
+      </section>
+
+      <!-- CALENDAR -->
+      <section data-viewpane="calendar" class="d-none">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+          <h4 class="fw-bold mb-0">Calendar Schedule</h4>
+          <div class="d-flex gap-2 align-items-center">
+            <input type="month" class="form-control" id="calMonth" style="max-width:180px">
+            <button class="btn btn-outline-secondary btn-sm rounded-3" data-bs-toggle="modal" data-bs-target="#maintModal"><i class="bi bi-cone-striped me-1"></i>Set Maintenance</button>
+          </div>
+        </div>
+        <div class="d-flex gap-3 small mb-2 flex-wrap">
+          <span><span class="badge bg-success"> </span> Available</span>
+          <span><span class="badge" style="background:#dc2626"> </span> Reserved</span>
+          <span><span class="badge" style="background:#f59e0b"> </span> Pending</span>
+          <span><span class="badge bg-secondary"> </span> Maintenance</span>
+        </div>
+        <div class="card-pc p-3 table-responsive"><table class="table mb-0" id="calTable"></table></div>
+      </section>
+
+      <!-- PAYMENTS -->
+      <section data-viewpane="payments" class="d-none">
+        <h4 class="fw-bold mb-3">Payment Management</h4>
+        <div class="card-pc p-3"><div class="table-responsive">
+          <table class="table table-pc align-middle">
+            <thead><tr><th>#</th><th>Booking</th><th>Customer</th><th>Method</th><th>Amount</th><th>Proof</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="adminPaymentRows"></tbody>
+          </table>
+        </div></div>
+      </section>
+
+      <!-- COURTS -->
+      <section data-viewpane="courts" class="d-none">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="fw-bold mb-0">Court Management</h4>
+          <button class="btn btn-pc" onclick="openCourtModal()"><i class="bi bi-plus-lg me-1"></i>Add Court</button>
+        </div>
+        <div class="row g-3" id="adminCourtCards"></div>
+      </section>
+
+      <!-- CUSTOMERS -->
+      <section data-viewpane="customers" class="d-none">
+        <h4 class="fw-bold mb-3">Customer Management</h4>
+        <div class="card-pc p-3"><div class="table-responsive">
+          <table class="table table-pc align-middle">
+            <thead><tr><th>Customer</th><th>Contact</th><th>Bookings</th><th>Total Spent</th><th>Membership</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="customerRows"></tbody>
+          </table>
+        </div></div>
+      </section>
+
+      <!-- SITE CONTENT: HIGHLIGHTS + LOGO -->
+      <section data-viewpane="content" class="d-none">
+        <h4 class="fw-bold mb-3">Landing Page Highlights</h4>
+        <div class="row g-3">
+          <div class="col-lg-4">
+            <div class="card-pc p-4 mb-3">
+              <h6 class="fw-bold mb-3"><i class="bi bi-plus-circle text-success me-2"></i>Add Highlight</h6>
+              <form id="hlForm" class="d-grid gap-2">
+                <select class="form-select" name="type" id="hlType" onchange="hlTypeChanged()">
+                  <option value="video">Facebook Video / Reel</option>
+                  <option value="image">Photo</option>
+                  <option value="post">Announcement / Event</option>
+                </select>
+                <input class="form-control" name="title" placeholder="Title" required>
+                <input class="form-control" name="url" id="hlUrl" placeholder="Facebook reel/video URL">
+                <input type="file" class="form-control d-none" name="image" id="hlImage" accept=".jpg,.jpeg,.png">
+                <textarea class="form-control d-none" name="text" id="hlText" rows="3" placeholder="Announcement or event details"></textarea>
+                <button class="btn btn-pc">Publish to Landing Page</button>
+              </form>
+            </div>
+            <div class="card-pc p-4">
+              <h6 class="fw-bold mb-2"><i class="bi bi-image text-primary me-2"></i>System Logo</h6>
+              <p class="small text-secondary">Upload your logo (JPG or PNG). It appears on every page.</p>
+              <div class="d-flex align-items-center gap-3 mb-2">
+                <span class="brand-logo-slot" data-size="64"></span>
+                <input type="file" class="form-control" id="logoFile" accept=".jpg,.jpeg,.png">
+              </div>
+              <div class="d-flex gap-2">
+                <button class="btn btn-pc-blue btn-pc flex-grow-1" onclick="uploadLogo()">Upload Logo</button>
+                <button class="btn btn-outline-secondary rounded-3" onclick="resetLogo()" title="Reset to default logo"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-8"><div class="card-pc p-3"><div class="table-responsive">
+            <table class="table table-pc align-middle">
+              <thead><tr><th>Type</th><th>Title</th><th>Content</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="hlRows"></tbody>
+            </table>
+          </div></div></div>
+        </div>
+      </section>
+
+      <!-- OPEN PLAY -->
+      <section data-viewpane="openplay" class="d-none">
+        <h4 class="fw-bold mb-3">Open Play Sessions</h4>
+        <p class="text-secondary small">Sessions show on the landing page and block their court's booking slots. Mark a session <strong>Full</strong> when fully booked, or disable it to hide the slot block.</p>
+        <div class="row g-3">
+          <div class="col-lg-4"><div class="card-pc p-4">
+            <h6 class="fw-bold mb-3"><i class="bi bi-plus-circle text-success me-2"></i>New Session</h6>
+            <form id="opForm" class="d-grid gap-2">
+              <input class="form-control" name="title" placeholder="e.g. Saturday Morning Open Play" required>
+              <select class="form-select" name="courtId" id="opCourt"></select>
+              <input type="date" class="form-control" name="date" required>
+              <div class="row g-2">
+                <div class="col-6"><select class="form-select" name="startHour" id="opStart"></select></div>
+                <div class="col-6"><select class="form-select" name="endHour" id="opEnd"></select></div>
+              </div>
+              <div class="row g-2">
+                <div class="col-6"><input type="number" class="form-control" name="fee" placeholder="Fee per player (₱)" min="0"></div>
+                <div class="col-6"><input type="number" class="form-control" name="capacity" placeholder="Max players" min="0"></div>
+              </div>
+              <input class="form-control" name="note" placeholder="Note (optional)">
+              <button class="btn btn-pc">Create Session</button>
+            </form>
+          </div></div>
+          <div class="col-lg-8"><div class="card-pc p-3"><div class="table-responsive">
+            <table class="table table-pc align-middle">
+              <thead><tr><th>Session</th><th>Schedule</th><th>Court</th><th>Fee / Cap</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="opRows"></tbody>
+            </table>
+          </div></div></div>
+        </div>
+      </section>
+
+      <!-- TOURNAMENTS -->
+      <section data-viewpane="tournaments" class="d-none">
+        <h4 class="fw-bold mb-3">Tournament Mode</h4>
+        <p class="text-secondary small">Published tournaments appear on the landing page with online registration and payment. Verify registration payments below.</p>
+        <div class="row g-3">
+          <div class="col-lg-4"><div class="card-pc p-4">
+            <h6 class="fw-bold mb-3"><i class="bi bi-plus-circle text-success me-2"></i>New Tournament</h6>
+            <form id="tForm" class="d-grid gap-2">
+              <input class="form-control" name="title" placeholder="e.g. Maasin Open 2026" required>
+              <input type="date" class="form-control" name="date" required>
+              <textarea class="form-control" name="description" rows="3" placeholder="Format, divisions, prizes…"></textarea>
+              <div class="row g-2">
+                <div class="col-6"><input type="number" class="form-control" name="fee" placeholder="Entry fee (₱)" min="0" required></div>
+                <div class="col-6"><input type="number" class="form-control" name="capacity" placeholder="Max teams/players" min="0"></div>
+              </div>
+              <button class="btn btn-pc">Publish Tournament</button>
+            </form>
+          </div></div>
+          <div class="col-lg-8">
+            <div class="card-pc p-3 mb-3"><div class="table-responsive">
+              <table class="table table-pc align-middle">
+                <thead><tr><th>Tournament</th><th>Date</th><th>Fee</th><th>Registered</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody id="tRows"></tbody>
+              </table>
+            </div></div>
+            <div class="card-pc p-3 d-none" id="tregPanel">
+              <h6 class="fw-bold mb-2" id="tregPanelTitle">Registrations</h6>
+              <div class="table-responsive">
+                <table class="table table-pc table-sm align-middle">
+                  <thead><tr><th>Player</th><th>Contact</th><th>Payment</th><th>Proof</th><th>Status</th><th>Actions</th></tr></thead>
+                  <tbody id="tregRows"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- EQUIPMENT -->
+      <section data-viewpane="equipment" class="d-none">
+        <h4 class="fw-bold mb-3">Equipment Inventory</h4>
+        <p class="text-secondary small">Stock is reduced automatically on booking and restored on cancellation/rejection.</p>
+        <div class="row g-3" id="equipCards"></div>
+      </section>
+
+      <!-- REPORTS -->
+      <section data-viewpane="reports" class="d-none">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+          <h4 class="fw-bold mb-0">Reports</h4>
+          <div class="d-flex gap-2 flex-wrap">
+            <button class="btn btn-sm btn-outline-secondary rounded-3" onclick="quickRange(0)">Daily</button>
+            <button class="btn btn-sm btn-outline-secondary rounded-3" onclick="quickRange(7)">Weekly</button>
+            <button class="btn btn-sm btn-outline-secondary rounded-3" onclick="quickRange(30)">Monthly</button>
+            <button class="btn btn-sm btn-outline-secondary rounded-3" onclick="quickRange(365)">Annual</button>
+          </div>
+        </div>
+        <div class="card-pc p-3 mb-3"><div class="row g-2 align-items-end">
+          <div class="col-md-3"><label class="form-label small">From</label><input type="date" class="form-control" id="repFrom"></div>
+          <div class="col-md-3"><label class="form-label small">To</label><input type="date" class="form-control" id="repTo"></div>
+          <div class="col-md-2"><button class="btn btn-pc w-100" onclick="loadReport()">Generate</button></div>
+          <div class="col-md-4 text-md-end">
+            <button class="btn btn-outline-secondary btn-sm rounded-3" onclick="exportReport('csv')"><i class="bi bi-filetype-csv"></i> CSV/Excel</button>
+            <button class="btn btn-outline-secondary btn-sm rounded-3" onclick="window.print()"><i class="bi bi-printer"></i> Print/PDF</button>
+          </div>
+        </div></div>
+        <div id="reportBody"></div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section data-viewpane="settings" class="d-none">
+        <h4 class="fw-bold mb-3">Settings</h4>
+        <div class="row g-3">
+          <div class="col-lg-6">
+            <div class="card-pc p-4 mb-3">
+              <h6 class="fw-bold mb-3"><i class="bi bi-clock text-success me-2"></i>Operating Hours (Open Daily)</h6>
+              <div class="row g-2">
+                <div class="col-6"><label class="form-label small">Opens at</label>
+                  <select class="form-select" id="setOpen"></select></div>
+                <div class="col-6"><label class="form-label small">Closes at</label>
+                  <select class="form-select" id="setClose"></select></div>
+                <div class="col-12"><label class="form-label small">Holiday hours (text)</label>
+                  <input class="form-control" id="setHoliday" placeholder="7:00 AM – 9:00 PM"></div>
+              </div>
+              <p class="small text-secondary mt-2 mb-0">This controls the bookable time slots and the "Open Daily" time shown on your landing page.</p>
+            </div>
+            <div class="card-pc p-4">
+              <h6 class="fw-bold mb-3"><i class="bi bi-geo-alt text-primary me-2"></i>Venue</h6>
+              <label class="form-label small">Venue name</label>
+              <input class="form-control mb-2" id="setVenue">
+              <label class="form-label small">Address</label>
+              <input class="form-control" id="setAddress">
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="card-pc p-4 mb-3">
+              <h6 class="fw-bold mb-3"><i class="bi bi-person-lines-fill text-success me-2"></i>Contact Information</h6>
+              <div class="row g-2">
+                <div class="col-12"><label class="form-label small">Contact name</label><input class="form-control" id="setName"></div>
+                <div class="col-6"><label class="form-label small">Email</label><input class="form-control" id="setEmail"></div>
+                <div class="col-6"><label class="form-label small">Phone</label><input class="form-control" id="setPhone"></div>
+                <div class="col-12"><label class="form-label small">Messenger</label><input class="form-control" id="setMessenger"></div>
+              </div>
+            </div>
+            <div class="card-pc p-4">
+              <h6 class="fw-bold mb-3"><i class="bi bi-wallet2 text-primary me-2"></i>Payment Details</h6>
+              <div class="row g-2">
+                <div class="col-6"><label class="form-label small">GCash number</label><input class="form-control" id="setGcash"></div>
+                <div class="col-6"><label class="form-label small">Maya number</label><input class="form-control" id="setMaya"></div>
+                <div class="col-6"><label class="form-label small">BDO account</label><input class="form-control" id="setBdo"></div>
+                <div class="col-6"><label class="form-label small">Account name</label><input class="form-control" id="setAcct"></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-12"><button class="btn btn-pc px-4" onclick="saveSettings()"><i class="bi bi-check-lg me-1"></i>Save Settings</button></div>
+        </div>
+      </section>
+
+      <!-- AUDIT -->
+      <section data-viewpane="audit" class="d-none">
+        <h4 class="fw-bold mb-3">Audit Logs</h4>
+        <div class="card-pc p-3"><div class="table-responsive">
+          <table class="table table-pc align-middle table-sm">
+            <thead><tr><th>Time</th><th>User</th><th>Action</th><th>Details</th></tr></thead>
+            <tbody id="auditRows"></tbody>
+          </table>
+        </div></div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<!-- Court add/edit modal -->
+<div class="modal fade" id="courtModal"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content card-pc">
+  <div class="modal-header border-0"><h5 class="fw-bold modal-title" id="courtModalTitle">Add Court</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+  <div class="modal-body">
+    <form id="courtForm" class="row g-3">
+      <input type="hidden" name="id">
+      <div class="col-md-4"><label class="form-label small">Name</label><input class="form-control" name="name" required></div>
+      <div class="col-md-4"><label class="form-label small">Type</label><select class="form-select" name="type"><option>Indoor</option><option>Outdoor</option></select></div>
+      <div class="col-md-4"><label class="form-label small">Status</label><select class="form-select" name="status"><option>Available</option><option>Unavailable</option><option>Maintenance</option></select></div>
+      <div class="col-md-4"><label class="form-label small">Surface</label><input class="form-control" name="surface"></div>
+      <div class="col-md-4"><label class="form-label small">Capacity</label><input type="number" class="form-control" name="capacity" value="4" min="2" max="8"></div>
+      <div class="col-md-4"><label class="form-label small">Size</label><input class="form-control" name="size" value="44 ft x 20 ft"></div>
+      <div class="col-md-6"><div class="form-check form-switch mt-4"><input class="form-check-input" type="checkbox" name="lighting" id="cl" checked><label class="form-check-label small" for="cl">Lighting</label></div></div>
+      <div class="col-md-6"><div class="form-check form-switch mt-4"><input class="form-check-input" type="checkbox" name="airconditioned" id="ca"><label class="form-check-label small" for="ca">Air Conditioned</label></div></div>
+      <div class="col-12"><h6 class="fw-bold small text-secondary mb-0 mt-2">PRICING (₱ per hour)</h6></div>
+      <div class="col"><label class="form-label small">Weekday</label><input type="number" class="form-control" name="pWeekday" value="250"></div>
+      <div class="col"><label class="form-label small">Weekend</label><input type="number" class="form-control" name="pWeekend" value="350"></div>
+      <div class="col"><label class="form-label small">Holiday</label><input type="number" class="form-control" name="pHoliday" value="400"></div>
+      <div class="col"><label class="form-label small">Peak</label><input type="number" class="form-control" name="pPeak" value="300"></div>
+      <div class="col"><label class="form-label small">Off-Peak</label><input type="number" class="form-control" name="pOffpeak" value="200"></div>
+      <div class="col-12"><button class="btn btn-pc w-100">Save Court</button></div>
+    </form>
+  </div>
+</div></div></div>
+
+<!-- Maintenance modal -->
+<div class="modal fade" id="maintModal"><div class="modal-dialog modal-dialog-centered"><div class="modal-content card-pc">
+  <div class="modal-header border-0"><h5 class="fw-bold modal-title">Schedule Maintenance</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+  <div class="modal-body d-grid gap-2">
+    <select class="form-select" id="maintCourt"></select>
+    <input type="date" class="form-control" id="maintDate">
+    <input class="form-control" id="maintNote" placeholder="Note (optional)">
+    <button class="btn btn-pc" onclick="saveMaintenance()">Block Date for Maintenance</button>
+  </div>
+</div></div></div>
+
+<!-- Proof viewer -->
+<div class="modal fade" id="proofModal"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content card-pc">
+  <div class="modal-header border-0"><h5 class="fw-bold modal-title">Proof of Payment</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+  <div class="modal-body text-center" id="proofBody"></div>
+</div></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="js/common.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>

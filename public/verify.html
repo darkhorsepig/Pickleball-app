@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verify Email — PickleCourt</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+<div class="container min-vh-100 d-flex align-items-center justify-content-center">
+  <div class="card-pc p-5 text-center fade-up" style="max-width:460px" id="box">
+    <div class="spinner-border text-success mb-3"></div>
+    <h4 class="fw-bold">Verifying your email…</h4>
+  </div>
+</div>
+<script src="js/common.js"></script>
+<script>
+(async () => {
+  const box = document.getElementById('box');
+  const token = new URLSearchParams(location.search).get('token');
+  try {
+    await API.get('/api/auth/verify?token=' + encodeURIComponent(token));
+    box.innerHTML = `<span class="icon-circle ic-green mx-auto mb-3" style="width:80px;height:80px;font-size:2rem"><i class="bi bi-check-lg"></i></span>
+      <h3 class="fw-bold">Email Verified! 🎉</h3>
+      <p class="text-secondary">Your account is now active. Log in to start booking courts.</p>
+      <a href="login.html" class="btn btn-pc">Go to Login</a>`;
+  } catch (ex) {
+    box.innerHTML = `<span class="icon-circle mx-auto mb-3" style="width:80px;height:80px;font-size:2rem;background:#fee2e2;color:#b91c1c"><i class="bi bi-x-lg"></i></span>
+      <h3 class="fw-bold">Verification Failed</h3>
+      <p class="text-secondary">${ex.message}</p>
+      <a href="index.html" class="btn btn-pc">Back to Home</a>`;
+  }
+})();
+</script>
+</body>
+</html>

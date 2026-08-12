@@ -1,0 +1,7 @@
+Save your "Dinks & Drinks Maasin City" logo image in this folder
+with the exact filename:
+
+    logo.png
+
+It will automatically appear in the navbar, hero section, footer,
+staff login, and admin portal. Until then, a fallback badge is shown.

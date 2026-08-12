@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Snow Bear CourtOS — Court Booking Platform</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+<div class="loading-overlay" id="pcLoader"><div class="bounce-ball"></div><div class="fw-bold text-success">Loading…</div></div>
+
+<nav class="navbar navbar-pc sticky-top">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center gap-2 fw-bold" href="/">
+      <span class="brand-badge" style="width:40px;height:40px">🐻</span>
+      Snow Bear <span class="text-success">CourtOS</span></a>
+    <div class="d-flex gap-2 align-items-center">
+      <button class="btn btn-sm btn-outline-secondary rounded-circle p-2" onclick="toggleTheme()"><i class="theme-icon bi bi-moon-stars"></i></button>
+      <a href="login.html" class="btn btn-pc btn-sm"><i class="bi bi-person-lock me-1"></i>Admin Login</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container hero-inner text-center">
+    <div class="mb-3" style="font-size:3rem">🐻🏓</div>
+    <h1 class="display-5 fw-bold mb-3">Court Booking Software for<br>Every Facility</h1>
+    <p class="lead opacity-75 mb-0" style="max-width:640px;margin:0 auto">
+      Snow Bear CourtOS gives each pickleball facility its own branded booking website and admin dashboard.
+      Pick a facility below to book a court.</p>
+  </div>
+</header>
+
+<section class="py-5">
+  <div class="container py-4">
+    <div class="text-center mb-5">
+      <h2 class="section-title">Our Facilities</h2>
+      <p class="section-sub">Book online — no sign-up needed.</p>
+    </div>
+    <div class="row g-4 justify-content-center" id="companyCards"></div>
+  </div>
+</section>
+
+<section class="py-5" style="background:var(--pc-card)">
+  <div class="container py-4 text-center" style="max-width:720px">
+    <h3 class="fw-bold mb-3">Run a court? Get your own booking site.</h3>
+    <p class="text-secondary mb-4">Your logo, your courts, your rates — a professional booking website and admin dashboard, powered by Snow Bear CourtOS.</p>
+    <a href="mailto:jeruzgarde@gmail.com" class="btn btn-pc btn-lg"><i class="bi bi-envelope me-2"></i>jeruzgarde@gmail.com</a>
+    <div class="small text-secondary mt-3">Engr. Jeruz Garde · 09614170201 · Messenger: Jeruz Garde</div>
+  </div>
+</section>
+
+<footer class="pc-footer py-4">
+  <div class="container d-flex justify-content-between flex-wrap small">
+    <span>© 2026 Snow Bear CourtOS. All rights reserved.</span>
+    <span>Court booking, done right 🐻🏓</span>
+  </div>
+</footer>
+
+<script src="/js/common.js"></script>
+<script>
+(async () => {
+  try {
+    const p = await API.get('/api/platform');
+    document.getElementById('companyCards').innerHTML = p.companies.length ? p.companies.map(c => `
+      <div class="col-md-6 col-lg-4"><div class="card-pc hoverable p-4 h-100 text-center">
+        <span class="icon-circle ic-green mx-auto mb-3" style="width:64px;height:64px;font-size:1.6rem"><i class="bi bi-buildings"></i></span>
+        <h5 class="fw-bold mb-1">${esc(c.name)}</h5>
+        <div class="mb-3">${c.active ? '<span class="badge bg-success rounded-pill">Open for booking</span>' : '<span class="badge bg-secondary rounded-pill">Temporarily unavailable</span>'}</div>
+        <a href="/c/${esc(c.slug)}" class="btn ${c.active ? 'btn-pc' : 'btn-outline-secondary rounded-3'}">${c.active ? 'Visit &amp; Book' : 'View'}</a>
+      </div></div>`).join('') : '<p class="text-center text-secondary">No facilities yet.</p>';
+  } catch (e) { console.error(e); }
+  hideLoader();
+})();
+</script>
+</body>
+</html>
