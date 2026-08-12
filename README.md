@@ -12,10 +12,15 @@ each on its own branded landing page and subscription.
 <img alt="Status" src="https://img.shields.io/badge/status-active-brightgreen">
 </p>
 
+<p align="center">
+  <img src="docs/poster.jpg" alt="Snow Bear CourtOS" width="380">
+</p>
+
 ---
 
 ## Table of contents
 - [Features](#features)
+- [Screenshots](#screenshots)
 - [Tech stack](#tech-stack)
 - [Quick start](#quick-start)
 - [Configuration](#configuration)
@@ -50,6 +55,18 @@ each on its own branded landing page and subscription.
 - Manage all companies/venues from one control plane
 - Create venues, assign admins, and control **subscription plans** (Monthly / Quarterly / Yearly / Lifetime)
 - Subscription gating — premium features and public pages are disabled when a plan expires
+
+---
+
+## Screenshots
+
+| Landing page | No-sign-up booking |
+|:---:|:---:|
+| ![Landing page](docs/home.jpg) | ![Booking flow](docs/booking.jpg) |
+| **Owner dashboard & analytics** | **Payment verification & receipts** |
+| ![Dashboard](docs/dashboard.jpg) | ![Payments](docs/payments.jpg) |
+| **Tournaments** | **Open Play** |
+| ![Tournaments](docs/tournaments.jpg) | ![Open Play](docs/openplay.jpg) |
 
 ---
 
